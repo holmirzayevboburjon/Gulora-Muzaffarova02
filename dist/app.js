@@ -63,7 +63,11 @@ if (telegram) {
   try {
     const url = new URL(settings.telegramUrl);
     valid = url.protocol === 'https:' && ['t.me', 'telegram.me'].includes(url.hostname) && url.pathname.length > 1;
-    if (valid) telegram.href = url.href;
+    if (valid) {
+      telegram.href = url.href;
+      // Keep the confirmation page and lead tracking before opening Telegram.
+      setTimeout(() => window.location.assign(url.href), 1000);
+    }
   } catch {}
   if (!valid) telegram.addEventListener('click', event => {
     event.preventDefault(); document.querySelector('.telegram-error').hidden = false;
