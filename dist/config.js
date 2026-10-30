@@ -1,2 +1,2 @@
 // Telegram kanal havolasini shu yerga yozing, masalan: https://t.me/kanal_nomi
-window.SITE_CONFIG = Object.freeze({ telegramUrl: "https://t.me/guloramuzaffarova", registrationEndpoint: "/api/register" });
+window.SITE_CONFIG = Object.freeze({ telegramUrl: "https://t.me/+iAsglWwc1Co2NDUy", registrationEndpoint: "/api/register" });
