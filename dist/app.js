@@ -49,7 +49,12 @@ if (dialog) {
       });
       const result = await response.json();
       if (!response.ok || result.ok !== true) throw new Error('Registration failed');
-      window.location.assign('thank-you.html');
+      const destination = new URL(settings.telegramUrl);
+      if (destination.protocol !== 'https:' || !['t.me', 'telegram.me'].includes(destination.hostname) || destination.pathname.length < 2) throw new Error('Invalid Telegram URL');
+      try {
+        if (typeof window.fbq === 'function') window.fbq('trackCustom', 'Lead_02');
+      } catch {}
+      window.location.assign(destination.href);
     } catch {
       error.textContent = 'Ma’lumot yuborilmadi. Iltimos, keyinroq qayta urinib ko‘ring.';
       submit.disabled = false;
