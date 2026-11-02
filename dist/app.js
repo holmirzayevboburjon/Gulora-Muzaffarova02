@@ -11,57 +11,22 @@ if (timer) {
   const interval = setInterval(render, 200);
   render();
 }
-const dialog = document.querySelector('#registration');
-if (dialog) {
-  document.querySelectorAll('.register').forEach(button => button.addEventListener('click', () => dialog.showModal()));
-  dialog.querySelector('.close').addEventListener('click', () => dialog.close());
-  dialog.addEventListener('click', event => {
-    if (event.target !== dialog) return;
-    const rect = dialog.getBoundingClientRect();
-    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
-  });
-  const form = document.querySelector('#lead-form');
-  let requestId = '';
-  let submittedValues = '';
-  form.addEventListener('submit', async event => {
-    event.preventDefault();
-    const error = document.querySelector('#form-error');
-    const submit = form.querySelector('[type=submit]');
-    if (submit.disabled) return;
-    error.textContent = '';
-    const name = form.elements.name.value.trim();
-    const phone = form.elements.phone.value.replace(/[\s()-]/g, '');
-    if (name.length < 2 || !/^\+?\d{9,15}$/.test(phone)) {
-      error.textContent = 'Ismingiz va telefon raqamingizni to‘liq kiriting.';
-      return;
-    }
-    submit.disabled = true;
-    submit.textContent = 'Yuborilmoqda…';
+// Main buttons open Telegram directly; no registration form or API request.
+document.querySelectorAll('.register').forEach(button => {
+  button.addEventListener('click', () => {
+    let destination;
     try {
-      const values = JSON.stringify({name, phone});
-      if (!requestId || values !== submittedValues) {
-        requestId = crypto.randomUUID();
-        submittedValues = values;
-      }
-      const response = await fetch(settings.registrationEndpoint || '/api/register', {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({name, phone, variant: '02', requestId}), signal: AbortSignal.timeout(15000)
+      destination = new URL(settings.telegramUrl);
+      if (destination.protocol !== 'https:' || !['t.me', 'telegram.me'].includes(destination.hostname) || destination.pathname.length < 2) return;
+    } catch { return; }
+    try {
+      if (typeof window.fbq === 'function') window.fbq('trackCustom', 'Lead_02', {
+        action: 'telegram_click', position: button.classList.contains('bottom') ? 'bottom' : 'top'
       });
-      const result = await response.json();
-      if (!response.ok || result.ok !== true) throw new Error('Registration failed');
-      const destination = new URL(settings.telegramUrl);
-      if (destination.protocol !== 'https:' || !['t.me', 'telegram.me'].includes(destination.hostname) || destination.pathname.length < 2) throw new Error('Invalid Telegram URL');
-      try {
-        if (typeof window.fbq === 'function') window.fbq('trackCustom', 'Lead_02');
-      } catch {}
-      window.location.assign(destination.href);
-    } catch {
-      error.textContent = 'Ma’lumot yuborilmadi. Iltimos, keyinroq qayta urinib ko‘ring.';
-      submit.disabled = false;
-      submit.textContent = 'Ro‘yxatdan o‘tish';
-    }
+    } catch {}
+    window.location.assign(destination.href);
   });
-}
+});
 const telegram = document.querySelector('#telegram');
 if (telegram) {
   let valid = false;
